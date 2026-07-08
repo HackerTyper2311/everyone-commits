@@ -1,6 +1,6 @@
 name: Auto-merge and clean up branches
 
-"on":
+on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
@@ -11,7 +11,45 @@ permissions:
 jobs:
   merge-and-clean:
     runs-on: ubuntu-latest
+
     steps:
+      - name: Check blacklisted folders
+        id: blacklist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BLACKLIST=(
+            ".github/"
+          )
+
+          FILES=$(gh pr diff "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --name-only)
+
+          echo "Changed files:"
+          echo "$FILES"
+
+          for FOLDER in "${BLACKLIST[@]}"; do
+            if echo "$FILES" | grep -q "^$FOLDER"; then
+              echo "PR modifies blacklisted folder: $FOLDER"
+              echo "blocked=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          echo "blocked=false" >> "$GITHUB_OUTPUT"
+
+      - name: Close PR if blacklisted files changed
+        if: steps.blacklist.outputs.blocked == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr close "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --comment "This PR was automatically closed because it modifies a protected folder."
+
+          exit 1
+
       - name: Merge the pull request
         id: merge
         continue-on-error: true
@@ -25,9 +63,9 @@ jobs:
       - name: Note why it wasn't merged
         if: steps.merge.outcome != 'success'
         run: |
-          echo "PR #${{ github.event.pull_request.number }} could not be merged (conflicts, failing checks, or branch protection). Leaving it open, branch untouched."
+          echo "PR could not be merged."
 
-      - name: Delete the source branch if it still exists
+      - name: Delete source branch
         if: >-
           steps.merge.outcome == 'success' &&
           github.event.pull_request.head.repo.full_name == github.repository
@@ -36,17 +74,8 @@ jobs:
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"
           DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
-          if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then
-            echo "Branch '$BRANCH' is the default branch, refusing to delete."
-          else
-            gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$BRANCH" \
-              && echo "Branch '$BRANCH' deleted." \
-              || echo "Branch '$BRANCH' already gone, nothing to delete."
-          fi
 
-      - name: Note fork branch left alone
-        if: >-
-          steps.merge.outcome == 'success' &&
-          github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          echo "Merged. Head branch is in a fork, leaving it alone."
+          if [ "$BRANCH" != "$DEFAULT_BRANCH" ]; then
+            gh api -X DELETE \
+              "repos/${{ github.repository }}/git/refs/heads/$BRANCH" || true
+          fi
