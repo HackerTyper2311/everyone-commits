@@ -96,24 +96,39 @@ Please update your branch with the latest \`main\`, resolve conflicts, and try a
               return;
             }
 
-            await github.rest.pulls.merge({
-              owner,
-              repo,
-              pull_number,
-              merge_method: "squash"
-            });
+            try {
+              await github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number,
+                merge_method: "squash"
+              });
 
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: pull_number,
-              body: "## ✅ Pull request merged automatically."
-            });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pull_number,
+                body: "## ✅ Pull request merged automatically."
+              });
 
-            const branch = context.payload.pull_request.head.ref;
+              const branch = context.payload.pull_request.head.ref;
 
-            await github.rest.repos.deleteBranch({
-              owner,
-              repo,
-              branch
-            });
+              await github.rest.repos.deleteBranch({
+                owner,
+                repo,
+                branch
+              });
+
+            } catch (error) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pull_number,
+                body:
+`## ⚠️ Automatic merge failed
+
+${error.message}`
+              });
+
+              core.setFailed(error.message);
+            }
