@@ -40,8 +40,7 @@ jobs:
                 owner,
                 repo,
                 issue_number: pull_number,
-                body:
-`## ❌ Blocked
+                body: `## ❌ Blocked
 
 This pull request changes files inside \`.github/\`.
 
@@ -60,7 +59,6 @@ Please remove the \`.github/\` changes and update the pull request.`
               return;
             }
 
-            // Wait for GitHub to calculate mergeability
             let pr;
 
             for (let i = 0; i < 10; i++) {
@@ -82,8 +80,7 @@ Please remove the \`.github/\` changes and update the pull request.`
                 owner,
                 repo,
                 issue_number: pull_number,
-                body:
-`## ❌ Automatic merge failed
+                body: `## ❌ Automatic merge failed
 
 This pull request has merge conflicts.
 
@@ -117,7 +114,7 @@ Please update your branch with the latest \`main\`, resolve conflicts, and try a
                 owner,
                 repo,
                 issue_number: pull_number,
-                body: "## ✅ Pull request merged automatically."
+                body: `## ✅ Pull request merged automatically.`
               });
 
               const branch = context.payload.pull_request.head.ref;
@@ -133,8 +130,7 @@ Please update your branch with the latest \`main\`, resolve conflicts, and try a
                 owner,
                 repo,
                 issue_number: pull_number,
-                body:
-`## ⚠️ Automatic merge failed
+                body: `## ⚠️ Automatic merge failed
 
 ${error.message}`
               });
