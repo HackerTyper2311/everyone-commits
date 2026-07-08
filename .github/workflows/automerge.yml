@@ -60,13 +60,22 @@ Please remove the \`.github/\` changes and update the pull request.`
               return;
             }
 
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            // Wait for GitHub to calculate mergeability
+            let pr;
 
-            const pr = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number
-            });
+            for (let i = 0; i < 10; i++) {
+              pr = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number
+              });
+
+              if (pr.data.mergeable !== null) {
+                break;
+              }
+
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            }
 
             if (pr.data.mergeable === false) {
               await github.rest.issues.createComment({
@@ -92,7 +101,7 @@ Please update your branch with the latest \`main\`, resolve conflicts, and try a
             }
 
             if (pr.data.mergeable !== true) {
-              core.setFailed("Merge status unavailable.");
+              core.setFailed("Could not determine merge status.");
               return;
             }
 
