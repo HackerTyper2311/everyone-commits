@@ -53,7 +53,26 @@ jobs:
               pull_number: number
             });
 
+            if (pr.data.mergeable === false) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: number,
+                body: "Merge failed: conflicts detected."
+              });
+
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: number,
+                state: "closed"
+              });
+
+              return;
+            }
+
             if (pr.data.mergeable !== true) {
+              core.setFailed("Merge status unavailable.");
               return;
             }
 
@@ -71,8 +90,10 @@ jobs:
               body: "Merged automatically."
             });
 
-            await github.rest.repos.deleteBranch({
+            const branch = context.payload.pull_request.head.ref;
+
+            await github.rest.git.deleteRef({
               owner,
               repo,
-              branch: context.payload.pull_request.head.ref
+              ref: `heads/${branch}`
             });
