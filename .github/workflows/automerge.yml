@@ -20,6 +20,7 @@ jobs:
         run: |
           BLACKLIST=(
             ".github/"
+            "README.md"
           )
 
           FILES=$(gh pr diff "${{ github.event.pull_request.number }}" \
