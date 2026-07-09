@@ -47,7 +47,7 @@ jobs:
         run: |
           gh pr close "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \
-            --comment "PR closed automatically: modifying protected folders is not allowed."
+            --comment "PR closed automatically: modifying protected files is not allowed."
 
           exit 1
 
