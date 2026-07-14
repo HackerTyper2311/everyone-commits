@@ -1,11 +1,10 @@
-import fastapi as FastAPI
+from fastapi import FastAPI
 
 app = FastAPI()
 
 @app.get("/")
-def index():
-    return {"text":"Hello!"}
-
+def read_root():
+    return {"Hello": "World"}
 
 ## TODO Upload Videos
 ## -> sign URL for S3 direct upload
