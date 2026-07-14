@@ -7,7 +7,7 @@ and viewers can watch your videos.
 - Research Mobile (optional)
     Capacitor
     Quasar
-    Tauri
+   Tauri
     Dioxus
     Iced
     flet.dev
@@ -32,6 +32,10 @@ and viewers can watch your videos.
 - Docker/Podman containers 
 - FFMpeg for Video Processing
 - MediaMTX - RTMP and Video serving (optional)
+
+## Analytics
+- Trino
+- Athena
 
 ## Authentication / Authorization
 - Clerk Athentication
