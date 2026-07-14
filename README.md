@@ -1,13 +1,20 @@
 # YouTube App
 
 We are building a YouTube App where you can upload videos,
-and viewers can watch you videos.
+and viewers can watch your videos.
 
-## Archiecture Plan
+## Architecture Plan
 
+Redis = Key Value Store for fast storage and retrieval
+Redis => go fast
+
+- ~K8s~, ***ECS***, Fargate
+- Like Engine  ❤️♥️
+- Rabbit MQ  /  SQS
 - Recommendation Engine
-- Frontend React and TypeScript - QuickFix - 
-- Python for the backend with FastAPI and Gunicorn runtime
+- Frontend ReactJS and TypeScript - QuickFix - 
+- Python for the backend 
+- FastAPI and Gunicorn runtime
 - Video Storage on S3
 - PostgreSQL for Database
 - Redis for Caching
@@ -15,6 +22,7 @@ and viewers can watch you videos.
 - FFMpeg for Video Processing
 - MediaMTX - RTMP and Video serving
 - PubNub for any realtime websockt stuff
+- Queue for Video Processing
 
 ## Find Job
 
